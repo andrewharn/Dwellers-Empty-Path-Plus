@@ -2676,7 +2676,7 @@ Scene_Gameover.prototype.playGameoverMusic = function() {
 
 Scene_Gameover.prototype.createBackground = function() {
     this._backSprite = new Sprite();
-    this._backSprite.bitmap = ImageManager.loadSystem('GameOver');
+    this._backSprite.bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('GameOver');
     this.addChild(this._backSprite);
 };
 

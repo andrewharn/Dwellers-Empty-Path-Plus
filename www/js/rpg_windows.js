@@ -428,7 +428,7 @@ Window_Base.prototype.calcTextHeight = function(textState, all) {
 };
 
 Window_Base.prototype.drawIcon = function(iconIndex, x, y) {
-    var bitmap = ImageManager.loadSystem('IconSet');
+    var bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('IconSet');
     var pw = Window_Base._iconWidth;
     var ph = Window_Base._iconHeight;
     var sx = iconIndex % 16 * pw;
@@ -3080,7 +3080,7 @@ Window_ShopNumber.prototype.setCurrencyUnit = function(currencyUnit) {
 };
 
 Window_ShopNumber.prototype.createButtons = function() {
-    var bitmap = ImageManager.loadSystem('ButtonSet');
+    var bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('ButtonSet');
     var buttonWidth = 48;
     var buttonHeight = 48;
     this._buttons = [];
@@ -4018,7 +4018,7 @@ Window_NumberInput.prototype.itemWidth = function() {
 };
 
 Window_NumberInput.prototype.createButtons = function() {
-    var bitmap = ImageManager.loadSystem('ButtonSet');
+    var bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('ButtonSet');
     var buttonWidth = 48;
     var buttonHeight = 48;
     this._buttons = [];

@@ -694,7 +694,7 @@ Sprite_Actor.prototype.createMainSprite = function() {
 
 Sprite_Actor.prototype.createShadowSprite = function() {
     this._shadowSprite = new Sprite();
-    this._shadowSprite.bitmap = ImageManager.loadSystem('Shadow2');
+    this._shadowSprite.bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('Shadow2');
     this._shadowSprite.anchor.x = 0.5;
     this._shadowSprite.anchor.y = 0.5;
     this._shadowSprite.y = -2;
@@ -1492,7 +1492,7 @@ Sprite_Damage.prototype.initialize = function() {
     this._duration = 90;
     this._flashColor = [0, 0, 0, 0];
     this._flashDuration = 0;
-    this._damageBitmap = ImageManager.loadSystem('Damage');
+    this._damageBitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('Damage');
 };
 
 Sprite_Damage.prototype.setup = function(target) {
@@ -1626,7 +1626,7 @@ Sprite_StateIcon.prototype.initMembers = function() {
 };
 
 Sprite_StateIcon.prototype.loadBitmap = function() {
-    this.bitmap = ImageManager.loadSystem('IconSet');
+    this.bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('IconSet');
     this.setFrame(0, 0, 0, 0);
 };
 
@@ -1701,7 +1701,7 @@ Sprite_StateOverlay.prototype.initMembers = function() {
 };
 
 Sprite_StateOverlay.prototype.loadBitmap = function() {
-    this.bitmap = ImageManager.loadSystem('States');
+    this.bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('States');
     this.setFrame(0, 0, 0, 0);
 };
 
@@ -1801,7 +1801,7 @@ Sprite_Weapon.prototype.updatePattern = function() {
 Sprite_Weapon.prototype.loadBitmap = function() {
     var pageId = Math.floor((this._weaponImageId - 1) / 12) + 1;
     if (pageId >= 1) {
-        this.bitmap = ImageManager.loadSystem('Weapons' + pageId);
+        this.bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('Weapons' + pageId);
     } else {
         this.bitmap = ImageManager.loadSystem('');
     }
@@ -1851,7 +1851,7 @@ Sprite_Balloon.prototype.initMembers = function() {
 };
 
 Sprite_Balloon.prototype.loadBitmap = function() {
-    this.bitmap = ImageManager.loadSystem('Balloon');
+    this.bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('Balloon');
     this.setFrame(0, 0, 0, 0);
 };
 
@@ -2176,8 +2176,8 @@ Spriteset_Base.prototype.createCanvasToneChanger = function() {
 Spriteset_Base.prototype.createPictures = function() {
     var width = Graphics.boxWidth;
     var height = Graphics.boxHeight;
-    var x = (Graphics.width - width) / 2;
-    var y = (Graphics.height - height) / 2;
+    var x = (Graphics.width - width) / 2 * 4;
+    var y = (Graphics.height - height) / 2 * 4;
     this._pictureContainer = new Sprite();
     this._pictureContainer.setFrame(x, y, width, height);
     for (var i = 1; i <= $gameScreen.maxPictures(); i++) {
@@ -2339,7 +2339,7 @@ Spriteset_Map.prototype.createCharacters = function() {
 
 Spriteset_Map.prototype.createShadow = function() {
     this._shadowSprite = new Sprite();
-    this._shadowSprite.bitmap = ImageManager.loadSystem('Shadow1');
+    this._shadowSprite.bitmap = ImageManager.loadSystem('');//ImageManager.loadSystem('Shadow1');
     this._shadowSprite.anchor.x = 0.5;
     this._shadowSprite.anchor.y = 1;
     this._shadowSprite.z = 6;
