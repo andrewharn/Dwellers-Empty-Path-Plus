@@ -1308,7 +1308,7 @@ Window_Command.prototype.initialize = function(x, y) {
 };
 
 Window_Command.prototype.windowWidth = function() {
-    return 240;
+    return 600;
 };
 
 Window_Command.prototype.windowHeight = function() {
@@ -2653,7 +2653,7 @@ Window_Options.prototype.initialize = function() {
 };
 
 Window_Options.prototype.windowWidth = function() {
-    return 400;
+    return 800;
 };
 
 Window_Options.prototype.windowHeight = function() {
@@ -2666,19 +2666,23 @@ Window_Options.prototype.updatePlacement = function() {
 };
 
 Window_Options.prototype.makeCommandList = function() {
-    this.addGeneralOptions();
     this.addVolumeOptions();
+    this.addGeneralOptions();
 };
 
 Window_Options.prototype.addGeneralOptions = function() {
+    // this.addCommand(TextManager.fullscreen, 'fullscreen');
+    // this.addCommand(TextManager.fps, 'fps');
+    this.addCommand(TextManager.vsync, 'vsync');
     this.addCommand(TextManager.alwaysDash, 'alwaysDash');
     this.addCommand(TextManager.commandRemember, 'commandRemember');
+    this.addCommand(TextManager.cancel, 'cancel');
 };
 
 Window_Options.prototype.addVolumeOptions = function() {
     this.addCommand(TextManager.bgmVolume, 'bgmVolume');
-    this.addCommand(TextManager.bgsVolume, 'bgsVolume');
-    this.addCommand(TextManager.meVolume, 'meVolume');
+    // this.addCommand(TextManager.bgsVolume, 'bgsVolume');
+    // this.addCommand(TextManager.meVolume, 'meVolume');
     this.addCommand(TextManager.seVolume, 'seVolume');
 };
 
@@ -2699,35 +2703,51 @@ Window_Options.prototype.statusWidth = function() {
 Window_Options.prototype.statusText = function(index) {
     var symbol = this.commandSymbol(index);
     var value = this.getConfigValue(symbol);
-    if (this.isVolumeSymbol(symbol)) {
-        return this.volumeStatusText(value);
+    if (this.isCancelSymbol(symbol)) {
+        return;
+    } else if (this.isFPSSymbol(symbol)) {
+        return value;
+    } else if (this.isVolumeSymbol(symbol)) {
+        return value + "%";
     } else {
-        return this.booleanStatusText(value);
+        return value ? 'ON' : 'OFF';
     }
+};
+
+Window_Options.prototype.isCancelSymbol = function(symbol) {
+    return symbol === 'cancel';
+};
+
+Window_Options.prototype.isFPSSymbol = function(symbol) {
+    return symbol.contains('fps');
 };
 
 Window_Options.prototype.isVolumeSymbol = function(symbol) {
     return symbol.contains('Volume');
 };
 
-Window_Options.prototype.booleanStatusText = function(value) {
-    return value ? 'ON' : 'OFF';
-};
-
-Window_Options.prototype.volumeStatusText = function(value) {
-    return value + '%';
-};
-
-Window_Options.prototype.processOk = function() {
+Window_Options.prototype.processOk = function(direction=0) {
     var index = this.index();
     var symbol = this.commandSymbol(index);
     var value = this.getConfigValue(symbol);
-    if (this.isVolumeSymbol(symbol)) {
-        value += this.volumeOffset();
+    if (this.isCancelSymbol(symbol)) {
+        this.processCancel();
+        return;
+    } else if (this.isVolumeSymbol(symbol) || this.isFPSSymbol(symbol)) {
+        var value_offset = 5;
+        if (direction == 0) {
+            value += value_offset;
+        } else if (direction == 1) {
+            value -= value_offset;
+        }
         if (value > 100) {
             value = 0;
         }
-        value = value.clamp(0, 100);
+        if (this.isVolumeSymbol(symbol)) {
+            value = value.clamp(0, 100);
+        } else if (this.isFPSSymbol(symbol)) {
+            value = value.clamp(10, 240);
+        }
         this.changeValue(symbol, value);
     } else {
         this.changeValue(symbol, !value);
@@ -2735,33 +2755,11 @@ Window_Options.prototype.processOk = function() {
 };
 
 Window_Options.prototype.cursorRight = function(wrap) {
-    var index = this.index();
-    var symbol = this.commandSymbol(index);
-    var value = this.getConfigValue(symbol);
-    if (this.isVolumeSymbol(symbol)) {
-        value += this.volumeOffset();
-        value = value.clamp(0, 100);
-        this.changeValue(symbol, value);
-    } else {
-        this.changeValue(symbol, true);
-    }
+    this.processOk(0);
 };
 
 Window_Options.prototype.cursorLeft = function(wrap) {
-    var index = this.index();
-    var symbol = this.commandSymbol(index);
-    var value = this.getConfigValue(symbol);
-    if (this.isVolumeSymbol(symbol)) {
-        value -= this.volumeOffset();
-        value = value.clamp(0, 100);
-        this.changeValue(symbol, value);
-    } else {
-        this.changeValue(symbol, false);
-    }
-};
-
-Window_Options.prototype.volumeOffset = function() {
-    return 20;
+    this.processOk(1);
 };
 
 Window_Options.prototype.changeValue = function(symbol, value) {
@@ -2774,11 +2772,23 @@ Window_Options.prototype.changeValue = function(symbol, value) {
 };
 
 Window_Options.prototype.getConfigValue = function(symbol) {
+    if (this.isCancelSymbol(symbol)) {
+        return;
+    }
     return ConfigManager[symbol];
 };
 
 Window_Options.prototype.setConfigValue = function(symbol, volume) {
+    if (this.isCancelSymbol(symbol)) {
+        return;
+    } else if (symbol === 'bgmVolume') {
+        ConfigManager['meVolume'] = volume;
+    } else if (symbol === 'seVolume') {
+        ConfigManager['bgsVolume'] = volume;
+    }
     ConfigManager[symbol] = volume;
+    console.log(volume);
+    console.log(ConfigManager[symbol]);
 };
 
 //-----------------------------------------------------------------------------
@@ -5740,12 +5750,15 @@ Window_TitleCommand.initCommandPosition = function() {
 };
 
 Window_TitleCommand.prototype.windowWidth = function() {
-    return 240;
+    return 320;
 };
 
 Window_TitleCommand.prototype.updatePlacement = function() {
     this.x = (Graphics.boxWidth - this.width) / 2;
     this.y = Graphics.boxHeight - this.height - 96;
+    this.x += 200
+    this.y += -360
+    this.setBackgroundType(0);
 };
 
 Window_TitleCommand.prototype.makeCommandList = function() {
@@ -5769,6 +5782,10 @@ Window_TitleCommand.prototype.selectLast = function() {
     } else if (this.isContinueEnabled()) {
         this.selectSymbol('continue');
     }
+};
+
+Window_TitleCommand.prototype.itemTextAlign = function() {
+    return 'center';
 };
 
 //-----------------------------------------------------------------------------

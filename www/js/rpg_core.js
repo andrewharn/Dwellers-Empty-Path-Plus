@@ -1331,6 +1331,7 @@ Bitmap.prototype.drawCircle = function(x, y, radius, color) {
 Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
     // Note: Firefox has a bug with textBaseline: Bug 737852
     //       So we use 'alphabetic' here.
+    // y += -5;
     if (text !== undefined) {
         var tx = x;
         var ty = y + lineHeight - (lineHeight - this.fontSize * 0.7) / 2;
@@ -1719,7 +1720,7 @@ function Graphics() {
 
 Graphics._cssFontLoading =  document.fonts && document.fonts.ready;
 Graphics._fontLoaded = null;
-Graphics._videoVolume = 1;
+Graphics._videoVolume = 0.6;
 
 /**
  * Initializes the graphics system.
@@ -2132,6 +2133,7 @@ Graphics._playVideo = function(src) {
     this._video.onloadeddata = this._onVideoLoad.bind(this);
     this._video.onerror = this._videoLoader;
     this._video.onended = this._onVideoEnd.bind(this);
+    this._video.volume = this._videoVolume
     this._video.load();
     this._videoLoading = true;
 };
@@ -2453,13 +2455,55 @@ Graphics._createErrorPrinter = function() {
 
 /**
  * @static
+ * @method printFullError
+ * @private
+ */
+Graphics.printFullError = function(name, message, stack) {
+    stack = this.processErrorStackMessage(stack);
+      if (this._errorPrinter) {
+          this._errorPrinter.innerHTML = this._makeFullErrorHtml(name, message, stack);
+      }
+      this._applyCanvasFilter();
+      this._clearUpperCanvas();
+  };
+  
+/**
+ * @static
+ * @method _makeFullErrorHtml
+ * @private
+ */
+  Graphics._makeFullErrorHtml = function(name, message, stack) {
+      var text = '';
+      for (var i = 2; i < stack.length; ++i) {
+        text += '<font color=white>' + stack[i] + '</font><br>';
+      }
+      return ('<font color="yellow"><b>' + stack[0] + '</b></font><br>' + '<font color="yellow"><b>' + stack[1] + '</b></font><br>' + text);
+  };
+
+/**
+ * @static
+ * @method processErrorStackMessage
+ * @private
+ */
+  Graphics.processErrorStackMessage = function(stack)  {
+      var data = stack.split(/(?:\r\n|\r|\n)/);
+      data.unshift('Game has crashed! Please report it to AndreWharn. :(<br>');
+      for (var i = 1; i < data.length; ++i) {
+         data[i] = data[i].replace(/[\(](.*[\/])/, '(');
+      }
+      data.push('<br><font color="yellow"><b>Press F5 to restart the game.</b></font><br>')
+      return data;
+  };
+
+/**
+ * @static
  * @method _updateErrorPrinter
  * @private
  */
 Graphics._updateErrorPrinter = function() {
     this._errorPrinter.width = this._width * 0.9;
-    this._errorPrinter.height = 40;
-    this._errorPrinter.style.textAlign = 'center';
+    this._errorPrinter.height = this._height * 0.5;
+    this._errorPrinter.style.textAlign = 'left';
     this._errorPrinter.style.textShadow = '1px 1px 3px #000';
     this._errorPrinter.style.fontSize = '20px';
     this._errorPrinter.style.zIndex = 99;
@@ -7690,7 +7734,7 @@ WebAudio.prototype.initialize = function(url) {
     this._url = url;
 };
 
-WebAudio._masterVolume   = 1;
+WebAudio._masterVolume   = 0.6;
 WebAudio._context        = null;
 WebAudio._masterGainNode = null;
 WebAudio._initialized    = false;
@@ -7931,7 +7975,7 @@ WebAudio.prototype.clear = function() {
     this._loopStart = 0;
     this._loopLength = 0;
     this._startTime = 0;
-    this._volume = 1;
+    this._volume = 0.6;
     this._pitch = 1;
     this._pan = 0;
     this._endTimer = null;
@@ -8624,7 +8668,7 @@ Html5Audio._onShow = function () {
  */
 Html5Audio.clear = function () {
     this.stop();
-    this._volume = 1;
+    this._volume = 0.6;
     this._loadListeners = [];
     this._hasError = false;
     this._autoPlay = false;

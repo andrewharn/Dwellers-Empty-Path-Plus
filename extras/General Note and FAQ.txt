@@ -1,0 +1,42 @@
+This story comes after Escaped Chasm, so it's best if you play that first!
+But it's also ok if you don't want to.
+The themes of this game aren't as heavy as themes explored in Escaped Chasm,
+but there is still some instances of eery and unsettling atmospheres.
+
+
+FAQ:
+
+ Regarding nw_elf.dll missing file: 
+
+I'm sorry! I'm not sure why this happens, but it seems like this 
+problem is addressed here: https://itch.io/t/432223/nw-elfdll-missing 
+(thank you to those who helped addressed this issue!! I really appreciate it!)
+
+ Regarding antivirus: 
+
+I'm sorry again! I don't know why the custom game icon causes antiviruses
+to get upset at the game... 
+If you are having difficulty with your antivirus, please download and try 
+the version of this game with the generic RPGMaker icon.
+
+ About Language patches/fan translations:
+
+Since I got a few questions about it for Escaped Chasm, 
+I wanted to say yes! You are allowed to make fan translations of
+any content I ever make. 
+Unfortunately, I cannot verify the accuracy of any translations,
+so use your own discretion..! 
+
+ About fanworks/fan art: 
+
+Yes! Fanworks and fan art is allowed of any content I ever make!
+I also allow the distribution of fanworks through conventions and fan-markets, 
+but please do not label them as official works!
+Thank you for liking my work enough to make such works..!
+
+ Use of my works on Social media: 
+
+You may use any of my personal works as icons, headers and etc for use on
+any social media, however please do not claim that any of these works are yours!
+This also only applies to works for my personal works, this does not extend 
+to commercial projects I've worked on for any of my clients.

@@ -346,9 +346,11 @@ Scene_Boot.prototype.initialize = function() {
 };
 
 Scene_Boot.prototype.create = function() {
+    GameWindowManager.window.maximize()
     Scene_Base.prototype.create.call(this);
     DataManager.loadDatabase();
     ConfigManager.load();
+    DataManager.changeGlobalPlus(["gameOpened"],[DataManager.loadGlobalPlus().gameOpened + 1])
     this.loadSystemWindowImage();
 };
 
@@ -421,7 +423,8 @@ Scene_Boot.prototype.checkPlayerLocation = function() {
 //
 // The scene class of the title screen.
 
-function Scene_Title() {
+function Scene_Title(extraParameters={}) {
+    Scene_Title.fadeIn = extraParameters["fadeIn"]
     this.initialize.apply(this, arguments);
 }
 
@@ -446,7 +449,9 @@ Scene_Title.prototype.start = function() {
     this.centerSprite(this._backSprite1);
     this.centerSprite(this._backSprite2);
     this.playTitleMusic();
-    this.startFadeIn(this.fadeSpeed(), false);
+    if (Scene_Title.fadeIn) {
+        this.startFadeIn(this.fadeSpeed(), false);
+    }
 };
 
 Scene_Title.prototype.update = function() {
@@ -511,6 +516,7 @@ Scene_Title.prototype.commandNewGame = function() {
     this._commandWindow.close();
     this.fadeOutAll();
     SceneManager.goto(Scene_Map);
+    DataManager.changeGlobalPlus(["gameStarted"],[DataManager.loadGlobalPlus().gameStarted + 1])
 };
 
 Scene_Title.prototype.commandContinue = function() {
@@ -925,6 +931,7 @@ Scene_MenuBase.prototype.createBackground = function() {
     this._backgroundSprite = new Sprite();
     this._backgroundSprite.bitmap = SceneManager.backgroundBitmap();
     this.addChild(this._backgroundSprite);
+    this.setBackgroundOpacity(150)
 };
 
 Scene_MenuBase.prototype.setBackgroundOpacity = function(opacity) {
@@ -1714,6 +1721,7 @@ Scene_Save.prototype.onSavefileOk = function() {
 Scene_Save.prototype.onSaveSuccess = function() {
     SoundManager.playSave();
 	StorageManager.cleanBackup(this.savefileId());
+    DataManager.changeGlobalPlus(["gameSaved"],[DataManager.loadGlobalPlus().gameSaved + 1])
     this.popScene();
 };
 
@@ -1773,6 +1781,7 @@ Scene_Load.prototype.onLoadSuccess = function() {
     this.reloadMapIfUpdated();
     SceneManager.goto(Scene_Map);
     this._loadSuccess = true;
+    DataManager.changeGlobalPlus(["gameLoaded"],[DataManager.loadGlobalPlus().gameLoaded + 1])
 };
 
 Scene_Load.prototype.onLoadFailure = function() {

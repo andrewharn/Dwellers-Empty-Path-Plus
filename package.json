@@ -1,5 +1,5 @@
 {
-    "name": "",
+    "name": "Dweller's Empty Path+",
     "main": "www/index.html",
     "js-flags": "--expose-gc",
     "window": {

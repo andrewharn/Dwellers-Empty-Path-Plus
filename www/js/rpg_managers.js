@@ -393,6 +393,31 @@ DataManager.loadGameWithoutRescue = function(savefileId) {
     }
 };
 
+DataManager.loadGlobalPlus = function() {
+    var json;
+    try {
+        json = StorageManager.load(-2);
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+    if (!json) {
+        json = JsonEx.stringify(this.makeGlobalPlusContents());
+    }
+    return JsonEx.parse(json);
+};
+
+DataManager.changeGlobalPlus = function(property, value) {
+    var json = this.loadGlobalPlus();
+    for (var property_count = 0; property_count < property.length; property_count++) {
+        for (var value_count = 0; value_count < value.length; value_count++) {
+            json[property[property_count]] = value[value_count];
+        }
+    }
+    StorageManager.save(-2, JSON.stringify(json));
+    return true;
+};
+
 DataManager.selectSavefileForNewGame = function() {
     var globalInfo = this.loadGlobalInfo();
     this._lastAccessedId = 1;
@@ -456,6 +481,18 @@ DataManager.extractSaveContents = function(contents) {
     $gamePlayer        = contents.player;
 };
 
+DataManager.makeGlobalPlusContents = function() {
+    var contents = {};
+    contents.gameOpened = 0;
+    contents.gameCompleted = 0;
+    contents.gameSaved = 0;
+    contents.gameLoaded = 0;
+    contents.gameEndings = [];
+    contents.gameBadEndings = 0;
+    contents.gameStarted = 0;
+    return contents;
+};
+
 //-----------------------------------------------------------------------------
 // ConfigManager
 //
@@ -467,6 +504,18 @@ function ConfigManager() {
 
 ConfigManager.alwaysDash        = false;
 ConfigManager.commandRemember   = false;
+ConfigManager.fps               = 0.0;
+ConfigManager.vsync             = false;
+
+Object.defineProperty(ConfigManager, 'masterVolume', {
+    get: function() {
+        return AudioManager._masterVolume;
+    },
+    set: function(value) {
+        AudioManager.masterVolume = value;
+    },
+    configurable: true
+});
 
 Object.defineProperty(ConfigManager, 'bgmVolume', {
     get: function() {
@@ -508,6 +557,20 @@ Object.defineProperty(ConfigManager, 'seVolume', {
     configurable: true
 });
 
+Object.defineProperty(ConfigManager, 'fullscreen', {
+    get: function() {
+        return !Graphics._isFullScreen();
+    },
+    set: function(value) {
+        if (value) {
+            Graphics._requestFullScreen();
+        } else {
+            Graphics._cancelFullScreen();
+        }
+    },
+    configurable: true
+});
+
 ConfigManager.load = function() {
     var json;
     var config = {};
@@ -530,6 +593,9 @@ ConfigManager.makeData = function() {
     var config = {};
     config.alwaysDash = this.alwaysDash;
     config.commandRemember = this.commandRemember;
+    config.fullscreen = this.fullscreen;
+    config.fps = this.fps;
+    config.vsync = this.vsync;
     config.bgmVolume = this.bgmVolume;
     config.bgsVolume = this.bgsVolume;
     config.meVolume = this.meVolume;
@@ -540,10 +606,28 @@ ConfigManager.makeData = function() {
 ConfigManager.applyData = function(config) {
     this.alwaysDash = this.readFlag(config, 'alwaysDash');
     this.commandRemember = this.readFlag(config, 'commandRemember');
+    this.fullscreen = this.readFlag(config, 'fullscreen');
+    this.fps = this.readFlag(config, 'fps');
+    this.vsync = this.readFlag(config, 'vsync');
     this.bgmVolume = this.readVolume(config, 'bgmVolume');
     this.bgsVolume = this.readVolume(config, 'bgsVolume');
     this.meVolume = this.readVolume(config, 'meVolume');
     this.seVolume = this.readVolume(config, 'seVolume');
+    if (config.alwaysDash === undefined) {
+        this.alwaysDash = false;
+    }
+    if (config.commandRemember === undefined) {
+        this.commandRemember = true;
+    }
+    if (config.fullscreen === undefined) {
+        this.fullscreen = false;
+    }
+    if (config.fps === undefined) {
+        this.fps = 60.0;
+    }
+    if (config.vsync === undefined) {
+        this.vsync = true;
+    }
 };
 
 ConfigManager.readFlag = function(config, name) {
@@ -555,7 +639,7 @@ ConfigManager.readVolume = function(config, name) {
     if (value !== undefined) {
         return Number(value).clamp(0, 100);
     } else {
-        return 100;
+        return 60;
     }
 };
 
@@ -761,7 +845,9 @@ StorageManager.localFileDirectoryPath = function() {
 
 StorageManager.localFilePath = function(savefileId) {
     var name;
-    if (savefileId < 0) {
+    if (savefileId === -2) {
+    name = 'global_plus.rpgsave';
+    } else if (savefileId === -1) {
         name = 'config.rpgsave';
     } else if (savefileId === 0) {
         name = 'global.rpgsave';
@@ -772,7 +858,9 @@ StorageManager.localFilePath = function(savefileId) {
 };
 
 StorageManager.webStorageKey = function(savefileId) {
-    if (savefileId < 0) {
+    if (savefileId === -2) {
+        return 'RPG Global Plus'; 
+    } else if (savefileId === -1) {
         return 'RPG Config';
     } else if (savefileId === 0) {
         return 'RPG Global';
@@ -860,7 +948,8 @@ ImageManager.loadBitmap = function(folder, filename, hue, smooth) {
     if (filename) {
         var path = folder + encodeURIComponent(filename) + '.png';
         var bitmap = this.loadNormalBitmap(path, hue || 0);
-        bitmap.smooth = smooth;
+        // bitmap.smooth = smooth;
+        bitmap.smooth = false;
         return bitmap;
     } else {
         return this.loadEmptyBitmap();
@@ -1102,10 +1191,10 @@ function AudioManager() {
 }
 
 AudioManager._masterVolume   = 1;   // (min: 0, max: 1)
-AudioManager._bgmVolume      = 100;
-AudioManager._bgsVolume      = 100;
-AudioManager._meVolume       = 100;
-AudioManager._seVolume       = 100;
+AudioManager._bgmVolume      = 40;
+AudioManager._bgsVolume      = 40;
+AudioManager._meVolume       = 40;
+AudioManager._seVolume       = 40;
 AudioManager._currentBgm     = null;
 AudioManager._currentBgs     = null;
 AudioManager._bgmBuffer      = null;
@@ -1123,8 +1212,8 @@ Object.defineProperty(AudioManager, 'masterVolume', {
     },
     set: function(value) {
         this._masterVolume = value;
-        WebAudio.setMasterVolume(this._masterVolume);
-        Graphics.setVideoVolume(this._masterVolume);
+        WebAudio.setMasterVolume(ConfigManager['masterVolume']);
+        Graphics.setVideoVolume(ConfigManager['bgmVolume'] / 100);
     },
     configurable: true
 });
@@ -1476,7 +1565,7 @@ AudioManager.createBuffer = function(folder, name) {
 AudioManager.updateBufferParameters = function(buffer, configVolume, audio) {
     if (buffer && audio) {
         buffer.volume = configVolume * (audio.volume || 0) / 10000;
-        buffer.pitch = (audio.pitch || 0) / 100;
+        buffer.pitch = (audio.pitch - ($gameSwitches.value(190) == true ? 20 : 0) || 0) / 100;
         buffer.pan = (audio.pan || 0) / 100;
     }
 };
@@ -1713,6 +1802,9 @@ Object.defineProperties(TextManager, {
     sell            : TextManager.getter('command', 25),
     alwaysDash      : TextManager.getter('message', 'alwaysDash'),
     commandRemember : TextManager.getter('message', 'commandRemember'),
+    fullscreen      : TextManager.getter('message', 'fullscreen'),
+    fps             : TextManager.getter('message', 'fps'),
+    vsync           : TextManager.getter('message', 'vsync'),
     bgmVolume       : TextManager.getter('message', 'bgmVolume'),
     bgsVolume       : TextManager.getter('message', 'bgsVolume'),
     meVolume        : TextManager.getter('message', 'meVolume'),
@@ -1945,7 +2037,7 @@ SceneManager.onKeyDown = function(event) {
 
 SceneManager.catchException = function(e) {
     if (e instanceof Error) {
-        Graphics.printError(e.name, e.message);
+        Graphics.printFullError(e.name, e.message, e.stack);
         console.error(e.stack);
     } else {
         Graphics.printError('UnknownError', e);
@@ -1968,21 +2060,27 @@ SceneManager.updateInputData = function() {
 };
 
 SceneManager.updateMain = function() {
-    if (Utils.isMobileSafari()) {
-        this.changeScene();
-        this.updateScene();
-    } else {
-        var newTime = this._getTimeInMsWithoutMobileSafari();
-        var fTime = (newTime - this._currentTime) / 1000;
-        if (fTime > 0.25) fTime = 0.25;
-        this._currentTime = newTime;
-        this._accumulator += fTime;
-        while (this._accumulator >= this._deltaTime) {
-            this.updateInputData();
+    if (ConfigManager.vsync) {
+        if (Utils.isMobileSafari()) {
             this.changeScene();
             this.updateScene();
-            this._accumulator -= this._deltaTime;
+        } else {
+            var newTime = this._getTimeInMsWithoutMobileSafari();
+            var fTime = (newTime - this._currentTime) / 1000;
+            if (fTime > 0.25) fTime = 0.25;
+            this._currentTime = newTime;
+            this._accumulator += fTime;
+            while (this._accumulator >= this._deltaTime) {
+                this.updateInputData();
+                this.changeScene();
+                this.updateScene();
+                this._accumulator -= this._deltaTime;
+            }
         }
+    } else {
+        this.updateInputData();
+        this.changeScene();
+        this.updateScene();
     }
     this.renderScene();
     this.requestUpdate();
@@ -2066,9 +2164,12 @@ SceneManager.isPreviousScene = function(sceneClass) {
     return this._previousClass === sceneClass;
 };
 
-SceneManager.goto = function(sceneClass) {
+SceneManager.goto = function(sceneClass, extraParameters={}) {
+    if (sceneClass === Scene_Title) {
+        extraParameters["fadeIn"] = (this._nextScene === Scene_Map)
+    }
     if (sceneClass) {
-        this._nextScene = new sceneClass();
+        this._nextScene = new sceneClass(extraParameters);
     }
     if (this._scene) {
         this._scene.stop();
@@ -2111,7 +2212,7 @@ SceneManager.snap = function() {
 
 SceneManager.snapForBackground = function() {
     this._backgroundBitmap = this.snap();
-    this._backgroundBitmap.blur();
+    // this._backgroundBitmap.blur();
 };
 
 SceneManager.backgroundBitmap = function() {

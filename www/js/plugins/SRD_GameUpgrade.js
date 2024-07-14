@@ -688,26 +688,26 @@ if(_.params['Wrap Mode'] === 'Repeat') {
 // Graphics
 //-----------------------------------------------------------------------------
 
-if(!Graphics.setVideoVolume) {
+// if(!Graphics.setVideoVolume) {
 
-Graphics._videoVolume = 1;
+// Graphics._videoVolume = 1;
 
-_.Graphics__createVideo = Graphics._createVideo;
-Graphics._createVideo = function() {
-	_.Graphics__createVideo.apply(this, arguments);
-	this._video.volume = this._videoVolume;
-};
+// _.Graphics__createVideo = Graphics._createVideo;
+// Graphics._createVideo = function() {
+// 	_.Graphics__createVideo.apply(this, arguments);
+// 	this._video.volume = this._videoVolume;
+// };
 
-Graphics.setVideoVolume = function(value) {
-	this._videoVolume = value;
-	if (this._video) {
-		this._video.volume = this._videoVolume;
-	}
-};
+// Graphics.setVideoVolume = function(value) {
+// 	this._videoVolume = value;
+// 	if (this._video) {
+// 		this._video.volume = this._videoVolume;
+// 	}
+// };
 
-}
+// }
 
-Graphics.setVideoVolume(_.params['Video Master Volume'] / 100);
+// Graphics.setVideoVolume(_.params['Video Master Volume'] / 100);
 
 _.Graphics__createRenderer = Graphics._createRenderer;
 Graphics._createRenderer = function() {
@@ -733,11 +733,11 @@ Graphics._applyGameUpgradeParameters = function() {
 // WebAudio
 //-----------------------------------------------------------------------------
 
-if(typeof(WebAudio) === 'function' && WebAudio.setMasterVolume) {
+// if(typeof(WebAudio) === 'function' && WebAudio.setMasterVolume) {
 
-WebAudio.setMasterVolume(_.params['Audio Master Volume'] / 100);
+// WebAudio.setMasterVolume(_.params['Audio Master Volume'] / 100);
 
-}
+// }
 
 //-----------------------------------------------------------------------------
 // ImageCache
