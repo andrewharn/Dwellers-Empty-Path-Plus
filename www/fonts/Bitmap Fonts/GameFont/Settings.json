@@ -1,0 +1,6 @@
+{
+    "fonts": {
+        "Temmie_Lettering03": {"spaceWidth": 20, "fontHeight": 24, "fontRange": [0, 24] },
+        "Temmie_Lettering04": {"spaceWidth": 7, "fontHeight": 25, "fontRange": [25, 90] }
+    }
+}

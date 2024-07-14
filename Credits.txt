@@ -1,0 +1,42 @@
+tuyoki.itch.io/dwellers-empty-path
+
+
+           PROMO ANIMATION:
+
+All animation (rough, clean, backgrounds) by Temmie Chang
+
+Music (Arrangement and Production)
+Camellia
+
+Music (Melody & Chords)
+Toby Fox
+Temmie Chang
+Camellia
+
+           GAME:
+
+Story, Characters, Concept, Illustration, Pixel Art, Animation by:
+Temmie Chang
+
+Music by:
+Camellia- Arrangement & Production + Melody/Chords
+Toby Fox - Melody/Chords
+Temmie Chang - Melody/Chords
+
+Special Thanks: 
+Archeia - font script use/RPGMaker help
+Yanfly - use of MessageCore and CoreEngine pluggins
+Sasuke Kannazuki - message sound plugin
+Chris Maltby - originally designed with gbstudio in mind
+Shawn Martins- playtest
+Jos Venti - playtest
+Joe Ryan - playtest
+Allie Mehner - playtest
+
+Sound programs:
+bfxr - sound effects
+pxtone - (Tem's) music 
+
+System: 
+RPGMaker MV 
+KADOKAWA/YOJI OJIMA

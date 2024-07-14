@@ -1,0 +1,8 @@
+Tem here!
+
+This was something I started working on because I wanted something to do in my free time.
+I was originally going to make this my first RPGMaker project, but I realized after I drew
+all these assets..that I didn't draw them in the correct dimensions for RPGMaker. 
+
+I put this project on the backburner for awhile until I could learn RPGMaker more, but ultimately
+I just ended up scrapping this project. 
