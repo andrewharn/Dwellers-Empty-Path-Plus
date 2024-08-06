@@ -690,20 +690,26 @@ Game_Screen.prototype.realPictureId = function(pictureId) {
 };
 
 Game_Screen.prototype.clearFade = function() {
+    this._fadeSign = 0;
+    this._fadeDuration = 0;
+	this._fadeSteps = 0;
+	this._fadePhase = 0;
     this._brightness = 255;
-    this._fadeOutDuration = 0;
-    this._fadeInDuration = 0;
 };
 
 Game_Screen.prototype.clearTone = function() {
     this._tone = [0, 0, 0, 0];
     this._toneTarget = [0, 0, 0, 0];
     this._toneDuration = 0;
+    this._toneSteps = 0;
+	this._tonePhase = 0;
 };
 
 Game_Screen.prototype.clearFlash = function() {
     this._flashColor = [0, 0, 0, 0];
     this._flashDuration = 0;
+    this._flashSteps = 0;
+	this._flashPhase = 0;
 };
 
 Game_Screen.prototype.clearShake = function() {
@@ -711,6 +717,8 @@ Game_Screen.prototype.clearShake = function() {
     this._shakeSpeed = 0;
     this._shakeDuration = 0;
     this._shakeDirection = 1;
+    this._shakeSteps = 0;
+	this._shakePhase = 0;
     this._shake = 0;
 };
 
@@ -720,6 +728,8 @@ Game_Screen.prototype.clearZoom = function() {
     this._zoomScale = 1;
     this._zoomScaleTarget = 1;
     this._zoomDuration = 0;
+    this._zoomSteps = 0;
+	this._zoomPhase = 0;
 };
 
 Game_Screen.prototype.clearWeather = function() {
@@ -741,40 +751,52 @@ Game_Screen.prototype.maxPictures = function() {
     return 100;
 };
 
-Game_Screen.prototype.startFadeOut = function(duration) {
-    this._fadeOutDuration = duration;
-    this._fadeInDuration = 0;
+Game_Screen.prototype.startFadeOut = function(duration = 30, steps = 3) {
+    this._fadeSign = 1;
+    this._fadeDuration = duration;
+	this._fadeSteps = (steps > duration) ? duration : steps;
+	this._fadePhase = 0;
 };
 
-Game_Screen.prototype.startFadeIn = function(duration) {
-    this._fadeInDuration = duration;
-    this._fadeOutDuration = 0;
+Game_Screen.prototype.startFadeIn = function(duration = 30, steps = 3) {
+    this._fadeSign = -1;
+    this._fadeDuration = duration;
+	this._fadeSteps = (steps > duration) ? duration : steps;
+	this._fadePhase = 0;
 };
 
-Game_Screen.prototype.startTint = function(tone, duration) {
+Game_Screen.prototype.startTint = function(tone, duration = 30, steps = 3) {
     this._toneTarget = tone.clone();
     this._toneDuration = duration;
+    this._toneSteps = (steps > duration) ? duration : steps;
+	this._tonePhase = 0;
     if (this._toneDuration === 0) {
         this._tone = this._toneTarget.clone();
     }
 };
 
-Game_Screen.prototype.startFlash = function(color, duration) {
+Game_Screen.prototype.startFlash = function(color, duration = 30, steps = 3) {
     this._flashColor = color.clone();
     this._flashDuration = duration;
+    this._flashSteps = (steps > duration) ? duration : steps;
+	this._flashPhase = 0;
 };
 
-Game_Screen.prototype.startShake = function(power, speed, duration) {
+Game_Screen.prototype.startShake = function(power, speed, duration = 30, steps = 3) {
     this._shakePower = power;
     this._shakeSpeed = speed;
     this._shakeDuration = duration;
+    this._shakeSteps = (steps > duration) ? duration : steps;
+	this._shakePhase = 0;
 };
 
-Game_Screen.prototype.startZoom = function(x, y, scale, duration) {
+Game_Screen.prototype.startZoom = function(x, y, scale, duration = 30, steps = 3) {
     this._zoomX = x;
     this._zoomY = y;
     this._zoomScaleTarget = scale;
     this._zoomDuration = duration;
+    this._zoomSteps = (steps > duration) ? duration : steps;
+	this._zoomPhase = 0;
 };
 
 Game_Screen.prototype.setZoom = function(x, y, scale) {
@@ -795,8 +817,7 @@ Game_Screen.prototype.changeWeather = function(type, power, duration) {
 };
 
 Game_Screen.prototype.update = function() {
-    this.updateFadeOut();
-    this.updateFadeIn();
+    this.updateFade();
     this.updateTone();
     this.updateFlash();
     this.updateShake();
@@ -805,19 +826,18 @@ Game_Screen.prototype.update = function() {
     this.updatePictures();
 };
 
-Game_Screen.prototype.updateFadeOut = function() {
-    if (this._fadeOutDuration > 0) {
-        var d = this._fadeOutDuration;
-        this._brightness = (this._brightness * (d - 1)) / d;
-        this._fadeOutDuration--;
-    }
-};
-
-Game_Screen.prototype.updateFadeIn = function() {
-    if (this._fadeInDuration > 0) {
-        var d = this._fadeInDuration;
-        this._brightness = (this._brightness * (d - 1) + 255) / d;
-        this._fadeInDuration--;
+Game_Screen.prototype.updateFade = function() {
+    if (this._fadeDuration > 0) {
+        for (var i = 0; i < this._fadeSteps; i++) {
+			if (this._fadePhase >= (this._fadeDuration / (this._fadeSteps - i))) {
+                this._brightness = Math.round((this._fadeSign > 0) ? ((255 / this._fadeSteps) * (this._fadeSteps - i)) : (255 / (this._fadeSteps - i)));
+				console.log("SCREEN FADE PHASE " + String(i) + ": " + String(this._brightness))
+			}
+		}
+        this._fadeDuration--;
+        this._fadePhase++;
+    } else {
+        this._brightness = (this._fadeSign > 0) ? 0 : 255
     }
 };
 
@@ -828,6 +848,7 @@ Game_Screen.prototype.updateTone = function() {
             this._tone[i] = (this._tone[i] * (d - 1) + this._toneTarget[i]) / d;
         }
         this._toneDuration--;
+        this._tonePhase++;
     }
 };
 
@@ -836,6 +857,7 @@ Game_Screen.prototype.updateFlash = function() {
         var d = this._flashDuration;
         this._flashColor[3] *= (d - 1) / d;
         this._flashDuration--;
+        this._flashPhase++;
     }
 };
 
@@ -854,6 +876,7 @@ Game_Screen.prototype.updateShake = function() {
             this._shakeDirection = 1;
         }
         this._shakeDuration--;
+        this._shakePhase++;
     }
 };
 
@@ -863,6 +886,7 @@ Game_Screen.prototype.updateZoom = function() {
         var t = this._zoomScaleTarget;
         this._zoomScale = (this._zoomScale * (d - 1) + t) / d;
         this._zoomDuration--;
+        this._zoomPhase++;
     }
 };
 

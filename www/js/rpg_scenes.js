@@ -30,6 +30,8 @@ Scene_Base.prototype.initialize = function() {
     this._active = false;
     this._fadeSign = 0;
     this._fadeDuration = 0;
+	this._fadeSteps = 0;
+	this._fadeStage = 0;
     this._fadeSprite = null;
     this._imageReservationId = Utils.generateRuntimeId();
 };
@@ -186,10 +188,12 @@ Scene_Base.prototype.addWindow = function(window) {
  * @instance 
  * @memberof Scene_Base
  */
-Scene_Base.prototype.startFadeIn = function(duration, white) {
+Scene_Base.prototype.startFadeIn = function(duration = 30, white, steps = 3) {
     this.createFadeSprite(white);
     this._fadeSign = 1;
-    this._fadeDuration = duration || 30;
+    this._fadeDuration = duration;
+	this._fadeSteps = steps;
+	this._fadePhase = 0;
     this._fadeSprite.opacity = 255;
 };
 
@@ -203,10 +207,12 @@ Scene_Base.prototype.startFadeIn = function(duration, white) {
  * @instance 
  * @memberof Scene_Base
  */
-Scene_Base.prototype.startFadeOut = function(duration, white) {
+Scene_Base.prototype.startFadeOut = function(duration = 30, white, steps = 3) {
     this.createFadeSprite(white);
     this._fadeSign = -1;
-    this._fadeDuration = duration || 30;
+    this._fadeDuration = duration ;
+	this._fadeSteps = steps;
+	this._fadePhase = 0;
     this._fadeSprite.opacity = 0;
 };
 
@@ -239,13 +245,14 @@ Scene_Base.prototype.createFadeSprite = function(white) {
  */
 Scene_Base.prototype.updateFade = function() {
     if (this._fadeDuration > 0) {
-        var d = this._fadeDuration;
-        if (this._fadeSign > 0) {
-            this._fadeSprite.opacity -= this._fadeSprite.opacity / d;
-        } else {
-            this._fadeSprite.opacity += (255 - this._fadeSprite.opacity) / d;
-        }
+		for (var i = 0; i < this._fadeSteps; i++) {
+			if (this._fadePhase >= (this._fadeDuration / (this._fadeSteps - i))) {
+                this._fadeSprite.opacity = Math.round((this._fadeSign > 0) ? ((255 / this._fadeSteps) * (this._fadeSteps - i)) : (255 / (this._fadeSteps - i)));
+				console.log("PHASE " + String(i) + ": " + String(this._fadeSprite.opacity))
+			}
+		}
         this._fadeDuration--;
+		this._fadePhase++;
     }
 };
 
@@ -626,9 +633,10 @@ Scene_Map.prototype.stop = function() {
     Scene_Base.prototype.stop.call(this);
     $gamePlayer.straighten();
     this._mapNameWindow.close();
-    if (this.needsSlowFadeOut()) {
-        this.startFadeOut(this.slowFadeSpeed(), false);
-    } else if (SceneManager.isNextScene(Scene_Map)) {
+    // if (this.needsSlowFadeOut()) {
+        // this.startFadeOut(this.slowFadeSpeed(), false);
+    // } else if (SceneManager.isNextScene(Scene_Map)) {
+	if (SceneManager.isNextScene(Scene_Map)) {
         this.fadeOutForTransfer();
     } else if (SceneManager.isNextScene(Scene_Battle)) {
         this.launchBattle();
